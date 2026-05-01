@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JellyStream — El Futuro de tu Entretenimiento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* =====================================================
+       VARIABLES & RESET
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:      #07080d;
+      --bg-card:      #0d0f18;
+      --bg-panel:     #12151f;
+      --purple:       #aa5cc3;
+      --blue:         #00a4dc;
+      --grad:         linear-gradient(135deg, #aa5cc3 0%, #00a4dc 100%);
+      --purple-glow:  rgba(170,92,195,.32);
+      --blue-glow:    rgba(0,164,220,.28);
+      --accent-dim:   rgba(100,120,220,.13);
+      --text-primary: #eef0f6;
+      --text-muted:   #616880;
+      --text-sub:     #9da4b8;
+      --border:       rgba(255,255,255,.07);
+      --border-hover: rgba(170,92,195,.5);
+      --radius:       14px;
+      --transition:   .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Gradientes ambientales */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 75% 55% at 5%  -5%,  rgba(170,92,195,.14) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 75% at 95% 105%, rgba(0,164,220,.11)  0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50%  50%,  rgba(80,60,140,.06)  0%, transparent 70%);
+      pointer-events: none;
+    }
+    /* Grano de película */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none; opacity: .7;
+    }
+
+    /* =====================================================
+       LAYOUT
+    ===================================================== */
+    #app {
+      position: relative; z-index: 2;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6rem 1.25rem 5.5rem;
+    }
+
+    /* =====================================================
+       GLASSMORPHISM SHIELDS — anti-colisión scroll
+    ===================================================== */
+    .header-shield {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 88px; z-index: 15;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: linear-gradient(to bottom,
+        rgba(7,8,13,.95) 0%,
+        rgba(7,8,13,.65) 55%,
+        transparent      100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 100%);
+      mask-image:         linear-gradient(to bottom, black 45%, transparent 100%);
+      pointer-events: none;
+    }
+    .footer-shield {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 70px; z-index: 15;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: linear-gradient(to top,
+        rgba(7,8,13,.95) 0%,
+        rgba(7,8,13,.60) 55%,
+        transparent      100%);
+      -webkit-mask-image: linear-gradient(to top, black 45%, transparent 100%);
+      mask-image:         linear-gradient(to top, black 45%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* =====================================================
+       BRAND / LOGO
+    ===================================================== */
+    .brand {
+      position: fixed; top: 1.4rem; left: 50%; transform: translateX(-50%);
+      z-index: 20;
+      display: flex; align-items: center; gap: .55rem;
+      user-select: none;
+    }
+    .brand-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--grad);
+      display: grid; place-items: center;
+      box-shadow: 0 0 20px var(--purple-glow);
+    }
+    .brand-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.55rem; letter-spacing: .08em;
+    }
+    .brand-name span {
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* =====================================================
+       BARRA DE PROGRESO
+    ===================================================== */
+    .progress-bar-wrap {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 3px; z-index: 30;
+      background: rgba(255,255,255,.05);
+    }
+    #progress-bar {
+      height: 100%;
+      background: var(--grad);
+      width: 0%;
+      transition: width .65s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 12px var(--purple-glow);
+    }
+
+    /* =====================================================
+       DOTS DE NAVEGACIÓN
+    ===================================================== */
+    .step-dots {
+      position: fixed; bottom: 1.6rem; left: 50%; transform: translateX(-50%);
+      display: flex; gap: .5rem; z-index: 20;
+      transition: opacity .4s;
+    }
+    .s-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      transition: var(--transition);
+    }
+    .s-dot.active {
+      background: var(--purple); width: 22px; border-radius: 3px;
+    }
+
+    /* =====================================================
+       PANTALLAS
+    ===================================================== */
+    .screen {
+      display: none; flex-direction: column;
+      align-items: center; text-align: center;
+      max-width: 700px; width: 100%;
+      animation: fadeSlideIn .5s cubic-bezier(.4,0,.2,1) both;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen-label {
+      font-size: .68rem; font-weight: 600; letter-spacing: .2em;
+      text-transform: uppercase;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.1rem;
+    }
+
+    .screen h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      line-height: 1.1; letter-spacing: .03em;
+      margin-bottom: .85rem;
+    }
+    .screen h1 em {
+      font-style: normal;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .screen h2 {
+      font-size: clamp(1.15rem, 3vw, 1.5rem);
+      font-weight: 500; line-height: 1.4;
+      margin-bottom: .9rem;
+    }
+    .screen h2 strong {
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .screen p {
+      font-size: .98rem; color: var(--text-sub);
+      max-width: 530px; margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    /* =====================================================
+       BOTÓN PRIMARIO
+    ===================================================== */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .9rem 2.4rem;
+      background: var(--grad);
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 600; letter-spacing: .04em;
+      border: none; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 28px var(--purple-glow);
+      transition: var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::after {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0); transition: background .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 44px var(--purple-glow); }
+    .btn-primary:hover::after { background: rgba(255,255,255,.09); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-next { margin-top: 1.8rem; padding: .8rem 2rem; }
+
+    /* =====================================================
+       BOTÓN OMITIR — outline degradado púrpura/azul
+    ===================================================== */
+    .btn-skip {
+      display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+      padding: .75rem 1.8rem;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 500;
+      border: 1.5px solid rgba(170,92,195,.4);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+      letter-spacing: .02em;
+    }
+    .btn-skip:hover {
+      border-color: rgba(0,164,220,.65);
+      color: var(--text-sub);
+      background: rgba(0,164,220,.05);
+    }
+    .btn-skip:active { transform: scale(.98); }
+
+    /* =====================================================
+       TARJETAS MULTI-SELECT
+    ===================================================== */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: .85rem; width: 100%; margin-bottom: .4rem;
+    }
+    .option-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1rem;
+      cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      user-select: none; position: relative;
+    }
+    .option-card .card-icon { font-size: 1.75rem; line-height: 1; }
+    .option-card .card-label {
+      font-size: .9rem; font-weight: 500; color: var(--text-sub);
+      transition: color var(--transition);
+    }
+    .option-card:hover {
+      border-color: var(--border-hover); background: var(--bg-panel);
+      transform: translateY(-3px);
+    }
+    .option-card.selected {
+      border-color: var(--purple);
+      background: rgba(170,92,195,.1);
+      box-shadow: 0 0 22px var(--purple-glow);
+    }
+    .option-card.selected .card-label { color: var(--text-primary); }
+    .option-card .check {
+      position: absolute; top: .5rem; right: .6rem;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--grad);
+      display: none; align-items: center; justify-content: center;
+    }
+    .option-card.selected .check { display: flex; }
+    .option-card .check svg { width: 10px; height: 10px; }
+
+    /* =====================================================
+       RADIO BUTTONS
+    ===================================================== */
+    .radio-list {
+      display: flex; flex-direction: column; gap: .7rem;
+      width: 100%; max-width: 500px; margin-bottom: .4rem;
+    }
+    .radio-btn {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.4rem;
+      cursor: pointer;
+      font-size: .95rem; font-weight: 500; color: var(--text-sub);
+      text-align: left; transition: var(--transition);
+      display: flex; align-items: flex-start; gap: 1rem;
+      user-select: none;
+    }
+    .radio-btn .rb-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      flex-shrink: 0; margin-top: .18rem;
+      transition: var(--transition);
+      display: grid; place-items: center;
+    }
+    .radio-btn:hover { border-color: var(--border-hover); background: var(--bg-panel); }
+    .radio-btn.selected {
+      border-color: var(--purple);
+      background: rgba(170,92,195,.1);
+      color: var(--text-primary);
+    }
+    .radio-btn.selected .rb-dot { border-color: var(--purple); background: var(--purple); }
+    .radio-btn.selected .rb-dot::after {
+      content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+    }
+    .rb-body  { display: flex; flex-direction: column; gap: .2rem; }
+    .rb-title { font-size: .95rem; font-weight: 600; color: var(--text-primary); }
+    .rb-price {
+      font-size: 1rem; font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .rb-desc  { font-size: .78rem; color: var(--text-muted); font-weight: 300; line-height: 1.4; }
+    .rb-tags  { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem; }
+    .rb-tag {
+      font-size: .68rem; font-weight: 600; letter-spacing: .07em;
+      padding: .2rem .55rem; border-radius: 50px;
+      background: rgba(0,164,220,.12); color: var(--blue);
+      border: 1px solid rgba(0,164,220,.25);
+    }
+    .rb-tag.purple {
+      background: rgba(170,92,195,.12); color: var(--purple);
+      border-color: rgba(170,92,195,.25);
+    }
+
+    /* =====================================================
+       HERO BADGE
+    ===================================================== */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(170,92,195,.12);
+      border: 1px solid rgba(170,92,195,.35);
+      border-radius: 50px; padding: .35rem 1rem;
+      font-size: .75rem; font-weight: 600; letter-spacing: .12em;
+      color: var(--purple); text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .features-row {
+      display: flex; gap: 1rem; margin-top: 2.2rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .feat-chip {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 50px; padding: .4rem .9rem;
+      font-size: .8rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: .4rem;
+    }
+
+    /* =====================================================
+       BADGE MÓDULO
+    ===================================================== */
+    .upsell-badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(0,164,220,.12);
+      border: 1px solid rgba(0,164,220,.35);
+      border-radius: 50px; padding: .35rem 1rem;
+      font-size: .72rem; font-weight: 600; letter-spacing: .14em;
+      color: var(--blue); text-transform: uppercase;
+      margin-bottom: 1.1rem;
+    }
+
+    /* =====================================================
+       PANTALLA 2 — CATÁLOGO (descripción del servicio)
+    ===================================================== */
+    .catalog-box {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.6rem;
+      text-align: left;
+      max-width: 580px; width: 100%;
+      margin-bottom: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .catalog-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--grad);
+    }
+    .catalog-box > p {
+      font-size: .97rem; color: var(--text-sub);
+      line-height: 1.75; margin-bottom: 0;
+      font-weight: 300;
+    }
+    .catalog-box > p strong { color: var(--text-primary); font-weight: 600; }
+    .catalog-highlight {
+      display: flex; align-items: flex-start; gap: .9rem;
+      background: rgba(170,92,195,.08);
+      border: 1px solid rgba(170,92,195,.22);
+      border-radius: 10px;
+      padding: .95rem 1.1rem;
+      margin-top: 1rem;
+    }
+    .catalog-highlight-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .05rem; }
+    .catalog-highlight p {
+      font-size: .85rem; color: var(--text-sub);
+      margin-bottom: 0; line-height: 1.6; font-weight: 300;
+    }
+    .catalog-highlight p strong { color: var(--purple); font-weight: 600; }
+
+    /* =====================================================
+       INPUT CONTACTO
+    ===================================================== */
+    .input-group {
+      display: flex; flex-direction: column; gap: .9rem;
+      width: 100%; max-width: 460px;
+      align-items: center;
+    }
+    .input-wrap { width: 100%; }
+    .input-wrap input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: 1rem; color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .input-wrap input::placeholder { color: var(--text-muted); }
+    .input-wrap input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 18px var(--purple-glow);
+    }
+    .final-note {
+      font-size: .78rem; color: var(--text-muted);
+      text-align: center;
+      margin-top: 0 !important; margin-bottom: 0 !important;
+    }
+    .btn-loading { opacity: .7; pointer-events: none; }
+    .btn-loading::before {
+      content: '';
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite; margin-right: .5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg {
+      font-size: .82rem; color: #f87171;
+      display: none; text-align: center;
+    }
+
+    /* =====================================================
+       PANTALLA 9 — ÉXITO
+    ===================================================== */
+    .success-ring {
+      width: 92px; height: 92px; border-radius: 50%;
+      background: rgba(170,92,195,.1);
+      border: 2px solid var(--purple);
+      box-shadow: 0 0 40px var(--purple-glow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem; margin-bottom: 1.8rem;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 28px var(--purple-glow); }
+      50%      { box-shadow: 0 0 60px var(--purple-glow), 0 0 80px var(--blue-glow); }
+    }
+
+    /* =====================================================
+       PANTALLA 10 — BYPASS / OMITIR
+    ===================================================== */
+    .bypass-ring {
+      width: 82px; height: 82px; border-radius: 50%;
+      background: rgba(0,164,220,.08);
+      border: 2px solid rgba(0,164,220,.4);
+      box-shadow: 0 0 32px rgba(0,164,220,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; margin-bottom: 1.8rem;
+    }
+    .bypass-quote {
+      background: var(--bg-card);
+      border-left: 3px solid var(--purple);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1.1rem 1.4rem;
+      text-align: left;
+      max-width: 520px; width: 100%;
+      margin: .8rem 0 2rem;
+    }
+    .bypass-quote p {
+      font-size: .93rem; color: var(--text-sub);
+      font-style: italic; margin-bottom: 0; line-height: 1.7;
+    }
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+    @media (max-width: 540px) {
+      .cards-grid  { grid-template-columns: 1fr; }
+      .screen h1   { font-size: 2.1rem; }
+      .radio-list  { max-width: 100%; }
+      .catalog-box { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shields glassmorphism -->
+  <div class="header-shield"></div>
+  <div class="footer-shield"></div>
+
+  <!-- Barra de progreso -->
+  <div class="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+  <!-- Logo Jellyfin oficial -->
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
+        <defs>
+          <linearGradient id="jf-g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#fff"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.8)"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 5 C28 5 12 21 12 42 C12 58 20 70 32 80 L50 97 L68 80 C80 70 88 58 88 42 C88 21 72 5 50 5 Z"
+              fill="url(#jf-g)" opacity="0.92"/>
+        <path d="M40 33 L68 50 L40 67 Z" fill="#1a0a2e"/>
+      </svg>
+    </div>
+    <div class="brand-name">Jelly<span>Stream</span></div>
+  </div>
+
+  <!-- Step dots -->
+  <div class="step-dots" id="step-dots"></div>
+
+  <!-- ============================================================
+       APP — 10 PANTALLAS
+  ============================================================ -->
+  <div id="app">
+
+    <!-- ==========================================
+         PANTALLA 1 — BIENVENIDA
+    ========================================== -->
+    <section class="screen active" id="screen-1">
+      <div class="hero-badge">
+        <span class="dot"></span> Próximamente: Proyecto en desarrollo
+      </div>
+
+      <h1>Bienvenido al <em>Futuro</em><br>de tu Entretenimiento</h1>
+
+      <p>
+        Ayúdanos a diseñar JellyStream respondiendo
+        <strong style="color:var(--text-primary)">5 preguntas rápidas</strong>
+        y obtén <strong style="color:var(--text-primary)">acceso prioritario</strong>
+        al lanzamiento.
+      </p>
+
+      <button class="btn-primary" onclick="goTo(2)">
+        Empezar Sondeo
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+
+      <div class="features-row">
+        <div class="feat-chip">🎬 Sin anuncios</div>
+        <div class="feat-chip">💸 Precio justo</div>
+        <div class="feat-chip">📱 Todo en una app</div>
+        <div class="feat-chip">⚡ Máxima calidad</div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 2 — DESCRIPCIÓN DEL CATÁLOGO
+    ========================================== -->
+    <section class="screen" id="screen-2">
+      <div class="screen-label">Conocé la plataforma</div>
+
+      <h1>Un catálogo hecho<br><em>a tu medida.</em></h1>
+
+      <div class="catalog-box">
+        <p>
+          En JellyStream tenés acceso a un catálogo enorme con las
+          <strong>películas, series y hasta las novelas</strong> que más te gustan,
+          todo en un solo lugar.
+        </p>
+        <div class="catalog-highlight">
+          <div class="catalog-highlight-icon">🔍</div>
+          <p>
+            Además, contamos con el servicio de <strong>Jellyseerr</strong>: si algo que buscás
+            no está dentro de la plataforma, solo debés solicitarlo desde la misma app
+            y nosotros lo agregamos para vos, para que siempre tengás disponible
+            exactamente lo que querés ver.
+          </p>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="goTo(3)">
+        Continuar
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 3 — PREGUNTA 1: MOLESTIAS
+    ========================================== -->
+    <section class="screen" id="screen-3">
+      <div class="screen-label">Pregunta 1 de 5</div>
+      <h2>¿Qué es lo que <strong>más te molesta</strong> de tus apps de streaming actuales?</h2>
+      <p>Podés elegir varias opciones.</p>
+
+      <div class="cards-grid" id="cards-q1">
+        <div class="option-card" data-val="Pago demasiado" onclick="toggleCard(this,'cards-q1','btn-q1')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">💸</span><span class="card-label">Pago demasiado</span>
+        </div>
+        <div class="option-card" data-val="Mucha publicidad" onclick="toggleCard(this,'cards-q1','btn-q1')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">📢</span><span class="card-label">Mucha publicidad</span>
+        </div>
+        <div class="option-card" data-val="Demasiadas apps" onclick="toggleCard(this,'cards-q1','btn-q1')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">😵</span><span class="card-label">Abrir muchas apps</span>
+        </div>
+        <div class="option-card" data-val="Cancelan mis series" onclick="toggleCard(this,'cards-q1','btn-q1')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">💔</span><span class="card-label">Cancelan mis series</span>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-next" id="btn-q1" onclick="goTo(4)" disabled>
+        Siguiente
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 4 — PREGUNTA 2: PLANES
+    ========================================== -->
+    <section class="screen" id="screen-4">
+      <div class="screen-label">Pregunta 2 de 5</div>
+      <h2>Imagina una sola app con <strong>TODO</strong> tu entretenimiento,<br>sin anuncios y en máxima calidad.</h2>
+      <p>¿Cuál de estos planes se ajusta mejor a lo que buscarías?</p>
+
+      <div class="radio-list" id="radio-q2">
+
+        <div class="radio-btn" data-val="Plan Básico – L 100/mes" onclick="selectRadio(this,'radio-q2','btn-q2')">
+          <div class="rb-dot"></div>
+          <div class="rb-body">
+            <span class="rb-title">Plan Básico</span>
+            <span class="rb-price">L 100 / mes</span>
+            <span class="rb-desc">Ideal si ves solo o en pareja. Películas y series sin anuncios desde cualquier dispositivo.</span>
+            <div class="rb-tags">
+              <span class="rb-tag">1 Pantalla simultánea</span>
+              <span class="rb-tag">Calidad HD</span>
+              <span class="rb-tag">2 solicitudes de contenido/mes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="radio-btn" data-val="Plan Estándar – L 200/mes" onclick="selectRadio(this,'radio-q2','btn-q2')">
+          <div class="rb-dot"></div>
+          <div class="rb-body">
+            <span class="rb-title">Plan Estándar</span>
+            <span class="rb-price">L 200 / mes</span>
+            <span class="rb-desc">Perfecto para familias. Más pantallas, mejor imagen y la posibilidad de pedir tu propio contenido.</span>
+            <div class="rb-tags">
+              <span class="rb-tag">3 Pantallas simultáneas</span>
+              <span class="rb-tag">Calidad Full HD</span>
+              <span class="rb-tag">5 solicitudes de contenido/mes</span>
+              <span class="rb-tag purple">Descargas incluidas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="radio-btn" data-val="Plan VIP – L 320/mes" onclick="selectRadio(this,'radio-q2','btn-q2')">
+          <div class="rb-dot"></div>
+          <div class="rb-body">
+            <span class="rb-title">Plan VIP ⭐</span>
+            <span class="rb-price">L 320 / mes</span>
+            <span class="rb-desc">La experiencia completa. Toda la familia, máxima calidad, TV en vivo y sin límites.</span>
+            <div class="rb-tags">
+              <span class="rb-tag">4 Pantallas simultáneas</span>
+              <span class="rb-tag">Calidad 4K HDR</span>
+              <span class="rb-tag">10 solicitudes de contenido/mes</span>
+              <span class="rb-tag purple">Descargas incluidas</span>
+              <span class="rb-tag purple">IPTV — TV en Vivo</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <p style="font-size:.8rem;color:var(--text-muted);margin-top:.6rem;margin-bottom:0;max-width:480px;">
+        💡 <strong style="color:var(--text-sub)">¿Qué es Jellyseerr?</strong>
+        Nuestra herramienta integrada donde podés <em>pedir directamente</em> las películas o series que querés ver y las agregamos para vos.
+      </p>
+
+      <button class="btn-primary btn-next" id="btn-q2" onclick="goTo(5)" disabled>
+        Siguiente
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 5 — PREGUNTA 3: TV EN VIVO
+    ========================================== -->
+    <section class="screen" id="screen-5">
+      <div class="upsell-badge">⚡ Módulo en desarrollo</div>
+      <div class="screen-label">Pregunta 3 de 5</div>
+      <h2>Deportes y <strong>TV en Vivo</strong>,<br>sin cable ni antena</h2>
+      <p>
+        Estamos integrando canales de deportes en directo, noticias y TV premium 24/7.
+        ¿Qué tanto te interesaría tener esto en JellyStream?
+      </p>
+
+      <div class="radio-list" id="radio-q3">
+        <div class="radio-btn" data-val="Sí, quiero deportes y TV en vivo" onclick="selectRadio(this,'radio-q3','btn-q3')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">🏆 ¡Sí! Quiero todo en un solo lugar</span></div>
+        </div>
+        <div class="radio-btn" data-val="Tal vez, depende del precio adicional" onclick="selectRadio(this,'radio-q3','btn-q3')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">🤔 Tal vez, depende del precio adicional</span></div>
+        </div>
+        <div class="radio-btn" data-val="No me interesa la TV en vivo" onclick="selectRadio(this,'radio-q3','btn-q3')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">❌ No me interesa la TV en vivo</span></div>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-next" id="btn-q3" onclick="goTo(6)" disabled>
+        Siguiente
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 6 — PREGUNTA 4: DISPOSICIÓN
+    ========================================== -->
+    <section class="screen" id="screen-6">
+      <div class="screen-label">Pregunta 4 de 5</div>
+      <h2>Si JellyStream<br>se hiciera realidad...</h2>
+      <p>¿Estarías dispuesto(a) a cancelar tus plataformas actuales (Netflix, Disney+, etc.) para pasarte con nosotros?</p>
+
+      <div class="radio-list" id="radio-q4">
+        <div class="radio-btn" data-val="Sí, cancelaría todo de inmediato" onclick="selectRadio(this,'radio-q4','btn-q4')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">✅ ¡Sí, cancelaría todo de inmediato!</span></div>
+        </div>
+        <div class="radio-btn" data-val="Mantendría ambas por un tiempo para probar" onclick="selectRadio(this,'radio-q4','btn-q4')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">⚖️ Mantendría ambas por un tiempo para probar</span></div>
+        </div>
+        <div class="radio-btn" data-val="No, prefiero quedarme como estoy" onclick="selectRadio(this,'radio-q4','btn-q4')">
+          <div class="rb-dot"></div>
+          <div class="rb-body"><span class="rb-title">🚫 No, prefiero quedarme como estoy</span></div>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-next" id="btn-q4" onclick="goTo(7)" disabled>
+        Siguiente
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 7 — PREGUNTA 5: DISPOSITIVO
+    ========================================== -->
+    <section class="screen" id="screen-7">
+      <div class="screen-label">Pregunta 5 de 5</div>
+      <h2>Conociendo<br><strong>tu estilo</strong></h2>
+      <p>¿En qué dispositivo solés ver tus series y películas principalmente?</p>
+
+      <div class="cards-grid" id="cards-q5">
+        <div class="option-card" data-val="Smart TV (Samsung, LG, JVC, etc.)" onclick="toggleCard(this,'cards-q5','btn-q5')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">📺</span><span class="card-label">Smart TV</span>
+        </div>
+        <div class="option-card" data-val="TV Box (Roku, Firestick, Apple TV)" onclick="toggleCard(this,'cards-q5','btn-q5')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">📦</span><span class="card-label">TV Box / Streaming Stick</span>
+        </div>
+        <div class="option-card" data-val="Computadora / Laptop" onclick="toggleCard(this,'cards-q5','btn-q5')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">💻</span><span class="card-label">Computadora / Laptop</span>
+        </div>
+        <div class="option-card" data-val="Celular / Tablet" onclick="toggleCard(this,'cards-q5','btn-q5')">
+          <div class="check"><svg viewBox="0 0 12 10" fill="none"><polyline points="1,5 4.5,8.5 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="card-icon">📱</span><span class="card-label">Celular / Tablet</span>
+        </div>
+      </div>
+
+      <button class="btn-primary btn-next" id="btn-q5" onclick="goTo(8)" disabled>
+        Continuar
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 8 — CONTACTO
+    ========================================== -->
+    <section class="screen" id="screen-8">
+      <div class="screen-label">Último paso</div>
+      <h1>¡Muchas gracias por<br><em>tu información!</em></h1>
+      <p>
+        Si este proyecto llegase a ver la luz, ¿te gustaría formar parte de los primeros testers
+        contando con días limitados para probar la plataforma de forma gratuita?
+      </p>
+
+      <div class="input-group">
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="contact-input"
+            placeholder="Tu correo electrónico o número de WhatsApp"
+            oninput="validateContact()"
+          />
+        </div>
+        <button class="btn-primary" id="btn-submit" onclick="submitForm()" disabled>
+          🚀 Me gustaría participar en el proyecto
+        </button>
+        <div class="error-msg" id="error-msg">Hubo un problema al enviar. Intentá de nuevo.</div>
+        <p class="final-note">Sin spam. Sin compromisos. Solo te avisamos cuando estemos listos. 🔒</p>
+        <!-- Omitir → pantalla 10 (sin enviar datos a Formspree) -->
+        <button class="btn-skip" onclick="goTo(10)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          Omitir este paso
+        </button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 9 — FINAL A: ÉXITO (con datos)
+    ========================================== -->
+    <section class="screen" id="screen-9">
+      <div class="success-ring">🎉</div>
+      <h1>¡Ya estás<br><em>Adentro!</em></h1>
+      <p>
+        Tu lugar en la Beta de JellyStream está reservado.
+        Te contactaremos pronto con acceso exclusivo antes que nadie más.
+      </p>
+      <div class="features-row" style="margin-top:1.5rem">
+        <div class="feat-chip" style="color:var(--text-primary)">✅ Lugar reservado</div>
+        <div class="feat-chip" style="color:var(--text-primary)">🔒 Datos seguros</div>
+        <div class="feat-chip" style="color:var(--text-primary)">⚡ Acceso prioritario</div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PANTALLA 10 — FINAL B: CORTÉS (omitir)
+    ========================================== -->
+    <section class="screen" id="screen-10">
+      <div class="bypass-ring">🙏</div>
+      <h1>¡Gracias por<br><em>tu tiempo!</em></h1>
+      <p>
+        Valoramos mucho tu opinión para nuestro sondeo.
+      </p>
+      <div class="bypass-quote">
+        <p>
+          "Si el proyecto se hace realidad, esperamos contar contigo para que disfrutés
+          de todo el cine y tus novelas favoritas con la mejor calidad.
+          ¡Nos vemos en JellyStream!"
+        </p>
+      </div>
+      <h2 style="font-size:1.25rem; margin-bottom:.5rem;">
+        ¡Te esperamos pronto en <strong>JellyStream</strong>! 🚀
+      </h2>
+      <div class="features-row" style="margin-top:1.2rem">
+        <div class="feat-chip">🎬 Sin anuncios</div>
+        <div class="feat-chip">💸 Precio justo</div>
+        <div class="feat-chip">⚡ Todo en una app</div>
+      </div>
+    </section>
+
+  </div><!-- /app -->
+
+
+  <script>
+    /* =====================================================
+       CONFIGURACIÓN
+       8 pasos de flujo (pantallas 1-8), cierres en 9 y 10
+    ===================================================== */
+    const FORMSPREE  = 'https://formspree.io/f/xaqvylok';
+    const TOTAL_DOTS = 8;
+
+    /* =====================================================
+       ESTADO GLOBAL
+    ===================================================== */
+    const state = {
+      current: 1,
+      answers: {
+        q1_molestias:   [],
+        q2_plan:        '',
+        q3_tv_vivo:     '',
+        q4_cancelaria:  '',
+        q5_dispositivo: [],
+        contacto:       ''
+      }
+    };
+
+    /* =====================================================
+       INICIALIZACIÓN
+    ===================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      buildDots();
+      renderUI();
+    });
+
+    /* =====================================================
+       DOTS DE NAVEGACIÓN
+    ===================================================== */
+    function buildDots() {
+      const wrap = document.getElementById('step-dots');
+      wrap.innerHTML = '';
+      for (let i = 1; i <= TOTAL_DOTS; i++) {
+        const d = document.createElement('div');
+        d.className = 's-dot' + (i === 1 ? ' active' : '');
+        d.id = 'sd-' + i;
+        wrap.appendChild(d);
+      }
+    }
+
+    function refreshDots(s) {
+      for (let i = 1; i <= TOTAL_DOTS; i++) {
+        const d = document.getElementById('sd-' + i);
+        if (d) d.className = 's-dot' + (i === s ? ' active' : '');
+      }
+      /* Ocultar dots en pantallas de cierre final */
+      document.getElementById('step-dots').style.opacity = (s >= 9) ? '0' : '1';
+    }
+
+    /* =====================================================
+       BARRA DE PROGRESO
+    ===================================================== */
+    function refreshProgress(s) {
+      const pct = s >= 9
+        ? 100
+        : Math.round(((s - 1) / (TOTAL_DOTS - 1)) * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+    }
+
+    /* =====================================================
+       NAVEGACIÓN
+    ===================================================== */
+    function showScreen(n) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const t = document.getElementById('screen-' + n);
+      if (!t) return;
+      t.style.animation = 'none';
+      void t.offsetHeight;
+      t.style.animation = '';
+      t.classList.add('active');
+    }
+
+    function renderUI() {
+      const s = state.current;
+      showScreen(s);
+      refreshDots(Math.min(s, TOTAL_DOTS));
+      refreshProgress(s);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goTo(n) {
+      state.current = n;
+      renderUI();
+    }
+
+    /* =====================================================
+       MULTI-SELECT CARDS
+    ===================================================== */
+    function toggleCard(el, groupId, btnId) {
+      el.classList.toggle('selected');
+      const vals = Array.from(
+        document.querySelectorAll('#' + groupId + ' .option-card.selected')
+      ).map(c => c.dataset.val);
+
+      if (groupId === 'cards-q1') state.answers.q1_molestias   = vals;
+      if (groupId === 'cards-q5') state.answers.q5_dispositivo = vals;
+
+      document.getElementById(btnId).disabled = vals.length === 0;
+    }
+
+    /* =====================================================
+       RADIO BUTTONS
+    ===================================================== */
+    function selectRadio(el, groupId, btnId) {
+      document.querySelectorAll('#' + groupId + ' .radio-btn')
+        .forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+
+      const v = el.dataset.val;
+      if (groupId === 'radio-q2') state.answers.q2_plan       = v;
+      if (groupId === 'radio-q3') state.answers.q3_tv_vivo    = v;
+      if (groupId === 'radio-q4') state.answers.q4_cancelaria = v;
+
+      document.getElementById(btnId).disabled = false;
+    }
+
+    /* =====================================================
+       VALIDACIÓN CONTACTO
+    ===================================================== */
+    function validateContact() {
+      const val = document.getElementById('contact-input').value.trim();
+      state.answers.contacto = val;
+      document.getElementById('btn-submit').disabled = val.length < 6;
+    }
+
+    /* =====================================================
+       ENVÍO A FORMSPREE → Pantalla 9
+       Omitir → Pantalla 10 (sin fetch)
+    ===================================================== */
+    async function submitForm() {
+      const btn    = document.getElementById('btn-submit');
+      const errMsg = document.getElementById('error-msg');
+      errMsg.style.display = 'none';
+
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const payload = {
+        '01_Contacto':               state.answers.contacto,
+        '02_Molestias_actuales':     state.answers.q1_molestias.join(', ')   || 'Ninguna',
+        '03_Plan_elegido':           state.answers.q2_plan                   || 'Sin respuesta',
+        '04_Interes_TV_en_vivo':     state.answers.q3_tv_vivo                || 'Sin respuesta',
+        '05_Cancelaria_plataformas': state.answers.q4_cancelaria             || 'Sin respuesta',
+        '06_Dispositivo_principal':  state.answers.q5_dispositivo.join(', ') || 'Sin respuesta',
+        '_subject': '[JellyStream] Nuevo registro: ' + state.answers.contacto
+      };
+
+      try {
+        const res = await fetch(FORMSPREE, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          goTo(9);
+        } else {
+          throw new Error('Error en Formspree');
+        }
+      } catch (err) {
+        console.error(err);
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+        btn.textContent = '🚀 Me gustaría participar en el proyecto';
+        errMsg.style.display = 'block';
+      }
+    }
+
+    /* Acceso a respuestas desde consola para debugging */
+    window.getAnswers = () => state.answers;
+  </script>
+
+</body>
+</html>
