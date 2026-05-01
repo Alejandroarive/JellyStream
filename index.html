@@ -857,8 +857,8 @@
         </button>
         <div class="error-msg" id="error-msg">Hubo un problema al enviar. Intentá de nuevo.</div>
         <p class="final-note">Sin spam. Sin compromisos. Solo te avisamos cuando estemos listos. 🔒</p>
-        <!-- Omitir → pantalla 10 (sin enviar datos a Formspree) -->
-        <button class="btn-skip" onclick="goTo(10)">
+        <!-- Omitir → envía datos a Formspree y va a pantalla 10 -->
+        <button class="btn-skip" onclick="submitAndSkip()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           Omitir este paso
         </button>
@@ -1083,6 +1083,34 @@
         btn.textContent = '🚀 Me gustaría participar en el proyecto';
         errMsg.style.display = 'block';
       }
+    }
+
+    /* =====================================================
+       OMITIR — envía igual a Formspree y va a pantalla 10
+    ===================================================== */
+    async function submitAndSkip() {
+      const payload = {
+        '01_Contacto':               state.answers.contacto || '(omitido)',
+        '02_Molestias_actuales':     state.answers.q1_molestias.join(', ')   || 'Ninguna',
+        '03_Plan_elegido':           state.answers.q2_plan                   || 'Sin respuesta',
+        '04_Interes_TV_en_vivo':     state.answers.q3_tv_vivo                || 'Sin respuesta',
+        '05_Cancelaria_plataformas': state.answers.q4_cancelaria             || 'Sin respuesta',
+        '06_Dispositivo_principal':  state.answers.q5_dispositivo.join(', ') || 'Sin respuesta',
+        '_subject': '[JellyStream] Sondeo completo (omitió contacto)'
+      };
+
+      /* Enviamos en segundo plano — si falla, igual llevamos al usuario a la pantalla 10 */
+      try {
+        await fetch(FORMSPREE, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn('Formspree (skip):', err);
+      }
+
+      goTo(10);
     }
 
     /* Acceso a respuestas desde consola para debugging */
